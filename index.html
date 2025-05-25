@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GROPATShift – Guest Shift Booking</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>GROPATShift</h1>
+    <p>Buchen Sie Ihre Schicht einfach als Gast | Book your shift as a guest</p>
+    <select id="languageSelector">
+      <option value="en">English</option>
+      <option value="de">Deutsch</option>
+    </select>
+  </header>
+
+  <main>
+    <form id="bookingForm">
+      <label for="name">👤 Name:</label>
+      <input type="text" id="name" name="name" required />
+
+      <label for="email">📧 Email:</label>
+      <input type="email" id="email" name="email" required />
+
+      <label for="date">📅 Shift Date:</label>
+      <input type="date" id="date" name="date" required />
+
+      <label for="time">🕒 Shift Time:</label>
+      <select id="time" name="time" required>
+        <option value="08:00–12:00">08:00–12:00</option>
+        <option value="12:00–16:00">12:00–16:00</option>
+        <option value="16:00–20:00">16:00–20:00</option>
+      </select>
+
+      <button type="submit">✅ Book Shift</button>
+    </form>
+
+    <div id="confirmation" class="hidden"></div>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 GROPATShift | Berlin, Germany</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
