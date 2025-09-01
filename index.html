@@ -9,8 +9,8 @@
 <body>
   <header>
     <h1>GROPATShift</h1>
-    <p>Buchen Sie Ihre Schicht einfach als Gast | Book your shift as a guest</p>
-    <select id="languageSelector">
+    <p>Book your work shift easily — No login required.</p>
+    <select id="languageSelector" aria-label="Select language">
       <option value="en">English</option>
       <option value="de">Deutsch</option>
     </select>
@@ -34,16 +34,24 @@
         <option value="16:00–20:00">16:00–20:00</option>
       </select>
 
-      <button type="submit">✅ Book Shift</button>
-    </form>
+      <label for="location">📍 Location:</label>
+      <select id="location" name="location" required>
+        <option value="Berlin">Berlin</option>
+        <option value="Hamburg">Hamburg</option>
+        <option value="Munich">Munich</option>
+        <option value="Remote">Remote</option>
+      </select>
 
-    <div id="confirmation" class="hidden"></div>
+      <button type="submit">✅ Book Shift</button>
+  </form>
+
+  <div id="confirmation" role="status" aria-live="polite" class="hidden"></div>
   </main>
 
   <footer>
     <p>&copy; 2025 GROPATShift | Berlin, Germany</p>
   </footer>
 
-  <script src="app.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>

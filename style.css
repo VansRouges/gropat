@@ -74,6 +74,15 @@ button:hover {
   display: none;
 }
 
+.confirmation {
+  border: 1px solid #cfe8ff;
+  background-color: #e8f4ff;
+  padding: 1rem;
+  margin-top: 1rem;
+  border-radius: 6px;
+  color: #034a8f;
+}
+
 /* Footer */
 footer {
   text-align: center;
