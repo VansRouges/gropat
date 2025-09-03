@@ -23,7 +23,16 @@ app.use(helmet());
 app.use(express.json());
 app.use(morgan('combined'));
 app.use(cors({
-  origin: process.env.CORS_ORIGIN?.split(',') || '*',
+  origin: [
+    'https://gropat-1.onrender.com',
+    'http://localhost:8080',
+    'http://localhost:3000',
+    'http://127.0.0.1:8080',
+    ...(process.env.CORS_ORIGIN?.split(',') || [])
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 const limiter = rateLimit({
