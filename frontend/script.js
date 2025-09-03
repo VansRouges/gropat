@@ -51,8 +51,10 @@ document.addEventListener("DOMContentLoaded", function () {
     document.querySelector("footer p").textContent = txt.footer;
   }
 
-  // initialize language from selector on load
-  applyLanguage(languageSelector.value || "en");
+  // initialize language from localStorage or default to English
+  const savedLanguage = localStorage.getItem('gropatShiftLanguage') || 'en';
+  languageSelector.value = savedLanguage;
+  applyLanguage(savedLanguage);
 
   // Warmup backend on page load to prevent cold starts
   async function warmupBackend() {
@@ -72,7 +74,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Language switcher
   languageSelector.addEventListener("change", function () {
-    applyLanguage(this.value);
+    const selectedLanguage = this.value;
+    localStorage.setItem('gropatShiftLanguage', selectedLanguage);
+    applyLanguage(selectedLanguage);
   });
 
   // Form submit handler
@@ -84,7 +88,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const date = document.getElementById("date").value;
     const time = document.getElementById("time").value;
     const submitBtn = document.querySelector("button[type='submit']");
-    const lang = languageSelector.value || "en";
+    const lang = languageSelector.value || savedLanguage || "en";
 
     // Basic client-side validation
     if (!name || !email || !date || !time) {
