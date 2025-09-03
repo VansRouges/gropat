@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createBooking, listBookings } from '../controllers/bookingController.js';
+import { createBooking, listBookings, getBookingById, getBookingsByEmail } from '../controllers/bookingController.js';
 import { body, query, validationResult } from 'express-validator';
 
 const router = Router();
@@ -30,8 +30,24 @@ router.get(
   '/bookings',
   validate([
   query('date').optional().matches(/^\d{4}-\d{2}-\d{2}$/),
+  query('email').optional().isString(),
+  query('sort').optional().isString(),
   ]),
   listBookings
+);
+
+router.get(
+  '/bookings/search',
+  validate([
+    query('email').notEmpty().withMessage('Email is required'),
+    query('sort').optional().isString(),
+  ]),
+  getBookingsByEmail
+);
+
+router.get(
+  '/bookings/:id',
+  getBookingById
 );
 
 export default router;
