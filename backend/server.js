@@ -35,6 +35,11 @@ app.use(limiter);
 // Routes
 app.use('/api', bookingRoutes);
 
+// Health/warmup endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 app.listen(PORT, () => {
   console.log(`API listening on http://localhost:${PORT}`);
 });

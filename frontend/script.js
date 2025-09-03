@@ -54,6 +54,22 @@ document.addEventListener("DOMContentLoaded", function () {
   // initialize language from selector on load
   applyLanguage(languageSelector.value || "en");
 
+  // Warmup backend on page load to prevent cold starts
+  async function warmupBackend() {
+    try {
+      await fetch(`${API_BASE}/api/health`, { 
+        method: 'GET',
+        signal: AbortSignal.timeout(5000) // 5 second timeout for warmup
+      });
+      console.log('Backend warmed up successfully');
+    } catch (err) {
+      console.log('Backend warmup failed (may still work):', err.message);
+    }
+  }
+  
+  // Start warmup immediately
+  warmupBackend();
+
   // Language switcher
   languageSelector.addEventListener("change", function () {
     applyLanguage(this.value);
@@ -67,6 +83,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const email = document.getElementById("email").value.trim();
     const date = document.getElementById("date").value;
     const time = document.getElementById("time").value;
+    const submitBtn = document.querySelector("button[type='submit']");
+    const lang = languageSelector.value || "en";
 
     // Basic client-side validation
     if (!name || !email || !date || !time) {
@@ -76,14 +94,25 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
+    // Show loading state
+    const originalBtnText = submitBtn.textContent;
+    submitBtn.disabled = true;
+    submitBtn.textContent = lang === 'de' ? 'Wird gebucht...' : 'Booking...';
+    confirmation.classList.add("hidden");
+
     try {
+      // Extended timeout for Render cold starts (60 seconds)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60000);
+
       const res = await fetch(`${API_BASE}/api/bookings`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, date, time })
+        body: JSON.stringify({ name, email, date, time }),
+        signal: controller.signal
       });
 
-      const lang = languageSelector.value || "en";
+      clearTimeout(timeoutId);
 
       if (res.ok) {
         const msg = textContent[lang].success(name, date, time);
@@ -108,13 +137,23 @@ document.addEventListener("DOMContentLoaded", function () {
         confirmation.classList.add("confirmation");
       }
     } catch (err) {
-      const lang = languageSelector.value || "en";
-      const errorMsg = lang === 'de' 
-        ? "Netzwerkfehler. Bitte versuchen Sie es erneut."
-        : "Network error. Please try again.";
+      let errorMsg;
+      if (err.name === 'AbortError') {
+        errorMsg = lang === 'de' 
+          ? "Anfrage dauert zu lange. Der Server startet möglicherweise. Bitte versuchen Sie es erneut."
+          : "Request taking too long. Server may be starting up. Please try again.";
+      } else {
+        errorMsg = lang === 'de' 
+          ? "Netzwerkfehler. Bitte versuchen Sie es erneut."
+          : "Network error. Please try again.";
+      }
       confirmation.textContent = errorMsg;
       confirmation.classList.remove("hidden");
       confirmation.classList.add("confirmation");
+    } finally {
+      // Restore button state
+      submitBtn.disabled = false;
+      submitBtn.textContent = originalBtnText;
     }
   });
 });

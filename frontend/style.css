@@ -64,10 +64,16 @@ button {
   cursor: pointer;
   border-radius: 5px;
   width: 100%;
+  transition: background-color 0.3s ease;
 }
 
-button:hover {
+button:hover:not(:disabled) {
   background-color: #00449e;
+}
+
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
 }
 
 .hidden {
