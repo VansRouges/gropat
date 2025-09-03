@@ -1,0 +1,10 @@
+{
+  "name": "gropat-frontend-server",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node serve.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

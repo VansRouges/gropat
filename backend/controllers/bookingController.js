@@ -1,0 +1,53 @@
+import Booking from '../models/Booking.js';
+
+function isValidEmail(email) {
+  return /.+@.+\..+/.test(email);
+}
+
+function toMinutes(hhmm) {
+  const [hh, mm] = hhmm.split(':').map(Number);
+  return hh * 60 + mm;
+}
+function rangesEqual(t1, t2) {
+  // Expect format HH:MM–HH:MM
+  return t1 === t2;
+}
+
+export const createBooking = async (req, res) => {
+  try {
+  const { name, email, date, time } = req.body || {};
+
+  if (!name || !email || !date || !time) {
+      return res.status(400).json({ message: 'Missing required fields.' });
+    }
+    if (!isValidEmail(email)) {
+      return res.status(400).json({ message: 'Invalid email address.' });
+    }
+
+    // Enforce slot exclusivity: same date + identical time range cannot be double-booked
+    const existing = await Booking.findOne({ date, time }).lean();
+    const conflict = !!existing;
+    if (conflict) {
+      return res.status(409).json({ message: 'This shift time on this date is already booked.' });
+    }
+
+    const doc = await Booking.create({ name, email, date, time });
+    return res.status(201).json({ id: doc._id, message: 'Booking created' });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
+
+export const listBookings = async (req, res) => {
+  try {
+    const { date } = req.query;
+    const query = {};
+    if (date) query.date = date;
+    const rows = await Booking.find(query).sort({ created_at: -1 }).limit(100).lean();
+    return res.json(rows);
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
