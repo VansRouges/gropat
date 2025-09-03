@@ -12,6 +12,13 @@
     <div>
       <label for="filterDate">Date</label>
       <input type="date" id="filterDate" />
+      <label for="sortBy">Sort by</label>
+      <select id="sortBy">
+        <option value="created_at">Created Date (newest first)</option>
+        <option value="email">Email (A-Z)</option>
+        <option value="name">Name (A-Z)</option>
+        <option value="date">Shift Date</option>
+      </select>
       <button id="loadBtn">Load</button>
     </div>
     <div id="list"></div>
@@ -31,31 +38,59 @@
 
     async function load() {
       const date = document.getElementById('filterDate').value;
+      const sortBy = document.getElementById('sortBy').value;
       const q = new URLSearchParams();
       if (date) q.set('date', date);
-      const res = await fetch(`${API_BASE}/api/bookings?${q.toString()}`);
-      const data = await res.json();
-      const list = document.getElementById('list');
-      list.innerHTML = '';
-      if (!Array.isArray(data) || data.length === 0) {
-        list.textContent = 'No bookings found.';
-        return;
+      if (sortBy) q.set('sort', sortBy);
+      
+      try {
+        const res = await fetch(`${API_BASE}/api/bookings?${q.toString()}`);
+        const data = await res.json();
+        const list = document.getElementById('list');
+        list.innerHTML = '';
+        
+        if (!Array.isArray(data) || data.length === 0) {
+          list.textContent = 'No bookings found.';
+          return;
+        }
+        
+        // Client-side sorting as fallback if backend doesn't support it
+        let sortedData = [...data];
+        if (sortBy === 'email') {
+          sortedData.sort((a, b) => a.email.localeCompare(b.email));
+        } else if (sortBy === 'name') {
+          sortedData.sort((a, b) => a.name.localeCompare(b.name));
+        } else if (sortBy === 'date') {
+          sortedData.sort((a, b) => new Date(a.date) - new Date(b.date));
+        } else if (sortBy === 'created_at') {
+          sortedData.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        }
+        
+        const table = document.createElement('table');
+        table.style.width = '100%';
+        table.style.borderCollapse = 'collapse';
+        table.innerHTML = '<thead><tr><th>Name</th><th>Email</th><th>Date</th><th>Time</th><th>Created</th></tr></thead>';
+        const tbody = document.createElement('tbody');
+        
+        sortedData.forEach(b => {
+          const tr = document.createElement('tr');
+          const createdDate = new Date(b.created_at).toLocaleDateString() + ' ' + new Date(b.created_at).toLocaleTimeString();
+          tr.innerHTML = `<td>${b.name}</td><td>${b.email}</td><td>${b.date}</td><td>${b.time}</td><td>${createdDate}</td>`;
+          Array.from(tr.children).forEach(td => { 
+            td.style.borderTop = '1px solid #eee'; 
+            td.style.padding = '6px'; 
+          });
+          tbody.appendChild(tr);
+        });
+        
+        table.appendChild(tbody);
+        list.appendChild(table);
+      } catch (error) {
+        document.getElementById('list').textContent = 'Error loading bookings: ' + error.message;
       }
-      const table = document.createElement('table');
-      table.style.width = '100%';
-      table.style.borderCollapse = 'collapse';
-      table.innerHTML = '<thead><tr><th>Name</th><th>Email</th><th>Date</th><th>Time</th><th>Created</th></tr></thead>';
-      const tbody = document.createElement('tbody');
-      data.forEach(b => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${b.name}</td><td>${b.email}</td><td>${b.date}</td><td>${b.time}</td><td>${b.created_at}</td>`;
-        Array.from(tr.children).forEach(td => { td.style.borderTop = '1px solid #eee'; td.style.padding = '6px'; });
-        tbody.appendChild(tr);
-      });
-      table.appendChild(tbody);
-      list.appendChild(table);
     }
     document.getElementById('loadBtn').addEventListener('click', load);
+    document.getElementById('sortBy').addEventListener('change', load);
     load();
   </script>
 </body>

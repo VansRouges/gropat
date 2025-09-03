@@ -41,10 +41,24 @@ export const createBooking = async (req, res) => {
 
 export const listBookings = async (req, res) => {
   try {
-    const { date } = req.query;
+    const { date, sort } = req.query;
     const query = {};
     if (date) query.date = date;
-    const rows = await Booking.find(query).sort({ created_at: -1 }).limit(100).lean();
+    
+    // Determine sort order
+    let sortOptions = { created_at: -1 }; // Default: newest first
+    
+    if (sort === 'email') {
+      sortOptions = { email: 1 }; // A-Z
+    } else if (sort === 'name') {
+      sortOptions = { name: 1 }; // A-Z
+    } else if (sort === 'date') {
+      sortOptions = { date: 1 }; // Earliest first
+    } else if (sort === 'created_at') {
+      sortOptions = { created_at: -1 }; // Newest first
+    }
+    
+    const rows = await Booking.find(query).sort(sortOptions).limit(100).lean();
     return res.json(rows);
   } catch (e) {
     console.error(e);
